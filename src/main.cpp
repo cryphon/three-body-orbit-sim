@@ -6,7 +6,7 @@
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 800
 #define PI 3.141592653589
-#define MIN_DISTANCE 5.0f
+#define MIN_DISTANCE 1.0f
 
 const double G = 6.6743e-11; // m^3 kg^-1 s^-2
 
@@ -19,6 +19,10 @@ float camera_y = 0.0f;
 
 const float GRID_SPACING = 50.0f;
 const float GRID_ALPHA = 0.3f;
+
+float clamp(float value, float minVal, float maxVal) {
+    return std::max(minVal, std::min(value, maxVal));
+}
 
 
 class Object {
@@ -40,8 +44,9 @@ class Object {
 
         void accelerate(float x, float y, float delta) {
             this->vel[0] += x * delta;
-            this->vel[1] += y * delta;
+            this->vel[1] += y * delta; 
         }
+
         void update_pos(float delta) {
             this->pos[0] += this->vel[0] * delta;
             this->pos[1] += this->vel[1] * delta;
@@ -87,7 +92,7 @@ class Object {
             // check if objects are colliding
             if(dist < (radius + o.radius)) {
                     // collision response
-                    float overlap = (radius + o.radius) - dist;
+                    float overlap = (radius + o.radius) - dist + 100;
                     float nx = dx / dist; // normalized x direction
                     float ny = dy / dist; // normalized y direction
 
@@ -221,9 +226,11 @@ int main(void) {
 
 
     std::vector<Object> objs = {
-        Object(std::vector<float>{SCREEN_WIDTH / 4, 400.0f}, std::vector<float>{0.0f, 100.0f}, 7.35 * pow(10, 20), 15),
-        Object(std::vector<float>{SCREEN_WIDTH / 2 + SCREEN_WIDTH / 4, 400.0f}, std::vector<float>{0.0f, -100.0f}, 7.35 * pow(10, 21), 25),
-        Object(std::vector<float>{SCREEN_WIDTH / 2 , SCREEN_HEIGHT / 2}, std::vector<float>{0.0f, 0.0f}, 8.6 * pow(10, 22), 40),
+        Object(std::vector<float>{0.0f, 0.0f}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
+        Object(std::vector<float>{0.0f, SCREEN_HEIGHT}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
+        Object(std::vector<float>{SCREEN_WIDTH, 0.0f}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
+        Object(std::vector<float>{SCREEN_WIDTH, SCREEN_HEIGHT}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
+        Object(std::vector<float>{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
     };
 
     last_frame_time = glfwGetTime();
