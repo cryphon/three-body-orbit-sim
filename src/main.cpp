@@ -8,7 +8,7 @@
 #define PI 3.141592653589
 #define MIN_DISTANCE 5.0f
 
-const double G = 6.7943e-11; // m^3 kg^-1 s^-2
+const double G = 6.6743e-11; // m^3 kg^-1 s^-2
 
 GLFWwindow* start_GLFW();
 
@@ -135,6 +135,81 @@ float calculate_delta() {
 }
 
 
+void draw_grid(float camX, float camY) {
+    // Enable blending for transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Calculate world coordinates for the screen corners
+    float worldLeft = camX - SCREEN_WIDTH / 2;
+    float worldRight = camX + SCREEN_WIDTH / 2;
+    float worldBottom = camY - SCREEN_HEIGHT / 2;
+    float worldTop = camY + SCREEN_HEIGHT / 2;
+    
+    // Find the starting grid lines (round down to nearest grid spacing)
+    float startX = floor(worldLeft / GRID_SPACING) * GRID_SPACING;
+    float startY = floor(worldBottom / GRID_SPACING) * GRID_SPACING;
+    
+    // Determine how many grid lines to draw
+    int numLinesX = ceil((worldRight - startX) / GRID_SPACING) + 1;
+    int numLinesY = ceil((worldTop - startY) / GRID_SPACING) + 1;
+    
+    // Set grid color (light gray with transparency)
+    glColor4f(0.7f, 0.7f, 0.7f, GRID_ALPHA);
+    glLineWidth(1.0f);
+    
+    // Draw vertical grid lines
+    glBegin(GL_LINES);
+    for (int i = 0; i < numLinesX; i++) {
+        float x = startX + i * GRID_SPACING;
+        float screenX = x - camX + SCREEN_WIDTH / 2;
+        
+        // Only draw lines that are on screen (with some margin)
+        if (screenX >= -10 && screenX <= SCREEN_WIDTH + 10) {
+            glVertex2f(screenX, 0);
+            glVertex2f(screenX, SCREEN_HEIGHT);
+        }
+    }
+    
+    // Draw horizontal grid lines
+    for (int i = 0; i < numLinesY; i++) {
+        float y = startY + i * GRID_SPACING;
+        float screenY = y - camY + SCREEN_HEIGHT / 2;
+        
+        // Only draw lines that are on screen (with some margin)
+        if (screenY >= -10 && screenY <= SCREEN_HEIGHT + 10) {
+            glVertex2f(0, screenY);
+            glVertex2f(SCREEN_WIDTH, screenY);
+        }
+    }
+    glEnd();
+    
+    // Draw x and y axes with stronger color
+    glColor4f(0.2f, 0.6f, 0.8f, 0.7f); // More vibrant blue for axes
+    glLineWidth(2.0f);
+    
+    glBegin(GL_LINES);
+    // X-axis
+    float xAxisY = SCREEN_HEIGHT / 2 - camY;
+    if (xAxisY >= -10 && xAxisY <= SCREEN_HEIGHT + 10) {
+        glVertex2f(0, xAxisY);
+        glVertex2f(SCREEN_WIDTH, xAxisY);
+    }
+    
+    // Y-axis
+    float yAxisX = SCREEN_WIDTH / 2 - camX;
+    if (yAxisX >= -10 && yAxisX <= SCREEN_WIDTH + 10) {
+        glVertex2f(yAxisX, 0);
+        glVertex2f(yAxisX, SCREEN_HEIGHT);
+    }
+    glEnd();
+    
+    glDisable(GL_BLEND);
+}
+
+
+
+
 
 int main(void) {
     GLFWwindow* window = start_GLFW();
@@ -152,6 +227,8 @@ int main(void) {
     };
 
     last_frame_time = glfwGetTime();
+    bool first_frame = true;
+    float cam_smoothing_factor = 3.0f;
 
     while(!glfwWindowShouldClose(window)) {        
         glClear(GL_COLOR_BUFFER_BIT);
@@ -159,11 +236,24 @@ int main(void) {
         float delta = calculate_delta();
 
 
-        // update cam to track largest mass objs[2]
         Object largest = objs[2];
-        float lerp_factor = 2.0f * delta;
-        camera_x += (largest.pos[0] - camera_x) * lerp_factor;
-        camera_y += (largest.pos[1] - camera_y) *lerp_factor;
+
+        if (first_frame) {
+            // Initialize camera position to match object on first frame (no interpolation)
+            camera_x = largest.pos[0];
+            camera_y = largest.pos[1];
+            first_frame = false;
+        } else {
+            // Smooth camera movement with lerp
+            float lerp_factor = cam_smoothing_factor * delta;
+            // Clamp lerp factor to prevent overshooting
+            if (lerp_factor > 1.0f) lerp_factor = 1.0f;
+
+            camera_x += (largest.pos[0] - camera_x) * lerp_factor;
+            camera_y += (largest.pos[1] - camera_y) * lerp_factor;
+        }
+
+        draw_grid(camera_x, camera_y);
 
 
         for(auto& obj : objs) {
@@ -198,6 +288,11 @@ int main(void) {
         }
 
         for(auto& obj : objs) {
+            // set color based on mass
+            float mass_ratio = obj.mass / 7.35 * pow(10, 22);
+            if(mass_ratio > 1.0f) mass_ratio = 1.0f;
+
+            glColor3f(0.2f + 0.8f * mass_ratio, 0.2f + 0.8f * (1.0f - mass_ratio), 0.2f);
             obj.draw(camera_x, camera_y);
         }
 
