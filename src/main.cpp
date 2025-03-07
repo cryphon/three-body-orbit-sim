@@ -17,7 +17,7 @@ double last_frame_time = 0.0;
 float camera_x = 0.0f;
 float camera_y = 0.0f;
 
-const GRID_SPACING = 50.0f;
+const float GRID_SPACING = 50.0f;
 const float GRID_ALPHA = 0.3f;
 
 
