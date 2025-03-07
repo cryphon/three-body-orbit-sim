@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <vector>
+#include <random>
 
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 800
@@ -16,9 +17,6 @@ double last_frame_time = 0.0;
 float camera_x = 0.0f;
 float camera_y = 0.0f;
 
-const float GRID_SPACING = 50.0f;
-const float GRID_ALPHA = 0.3f;
-
 float clamp(float value, float minVal, float maxVal) {
     return std::max(minVal, std::min(value, maxVal));
 }
@@ -30,20 +28,41 @@ class Object {
         std::vector<float> vel;
         float mass;
         float density = 0.08375; // HYDROGEN
-        //float radius = pow(((3 * this->mass / this->density) / (4 * PI)), (1.0f / 3.0f));
         float radius;
-        int res = 100;
+        int res = 1000;
+        float restitution = 0.7f;
+        float max_vel = 550.0f;
         
-        Object(std::vector<float> pos, std::vector<float> vel, float mass, float radius = 15) {
+        Object(std::vector<float> pos, std::vector<float> vel, float mass, float density, float initial_radius = 0) {
             this->pos = pos;
             this->vel = vel;
             this->mass = mass;
-            this->radius = radius;
+
+             // Calculate the radius based on mass and density if not specified
+            if (initial_radius <= 0) {
+                update_radius();
+            } else {
+                this->radius = initial_radius;
+            }        
+        }
+
+        void clamp_vel() {
+            // Calculate current velocity magnitude
+            float vel_mag = sqrt(vel[0] * vel[0] + vel[1] * vel[1]);
+            
+            // If magnitude exceeds max_velocity, scale it down
+            if (vel_mag > max_vel) {
+                float scale = max_vel / vel_mag;
+                vel[0] *= scale;
+                vel[1] *= scale;
+            }
         }
 
         void accelerate(float x, float y, float delta) {
             this->vel[0] += x * delta;
             this->vel[1] += y * delta; 
+
+            //clamp_vel();
         }
 
         void update_pos(float delta) {
@@ -63,6 +82,22 @@ class Object {
             }
         }
 
+
+         void update_radius() {
+            // Use a simpler scaling approach that ensures visibility
+            const float BASE_RADIUS = 15.0f;
+            const float MIN_RADIUS = 10.0f;
+            const float MAX_RADIUS = 50.0f;
+            
+            // Use log scale for mass to handle large differences
+            float log_mass = log10(this->mass);
+            
+            // Map to reasonable screen sizes
+            this->radius = BASE_RADIUS + (log_mass - 20.0f) * 3.0f;
+            
+            // Clamp to reasonable limits
+            this->radius = clamp(this->radius, MIN_RADIUS, MAX_RADIUS);
+        }
 
         void draw() {
             glBegin(GL_TRIANGLE_FAN);
@@ -87,7 +122,7 @@ class Object {
             // check if objects are colliding
             if(dist < (radius + o.radius)) {
                     // collision response
-                    float overlap = (radius + o.radius) - dist + 100;
+                    float overlap = (radius + o.radius) - dist;
                     float nx = dx / dist; // normalized x direction
                     float ny = dy / dist; // normalized y direction
 
@@ -119,8 +154,7 @@ class Object {
                     o.vel[0] *= 0.95f;
                     o.vel[1] *= 0.95f;
             }
-        }
-};
+        }};
 
 
 float calculate_delta() {
@@ -135,32 +169,8 @@ float calculate_delta() {
 }
 
 
-
-int main(void) {
-    GLFWwindow* window = start_GLFW();
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-
-    float center_x = SCREEN_WIDTH / 2.0f;
-    float center_y = SCREEN_HEIGHT / 2.0f;
-
-
-    std::vector<Object> objs = {
-        Object(std::vector<float>{0.0f, 0.0f}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
-        Object(std::vector<float>{0.0f, SCREEN_HEIGHT}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
-        Object(std::vector<float>{SCREEN_WIDTH, 0.0f}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
-        Object(std::vector<float>{SCREEN_WIDTH, SCREEN_HEIGHT}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
-        Object(std::vector<float>{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, std::vector<float>{0.0f, 0.0f}, 7.35 * pow(10, 22), 25),
-    };
-
-    last_frame_time = glfwGetTime();
-
-    while(!glfwWindowShouldClose(window)) {        
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        float delta= calculate_delta();
-
-        for(auto& obj : objs) {
+void gravity(std::vector<Object> objs, float delta) {
+    for(auto& obj : objs) {
             for(auto& obj2 : objs) {
                 if(&obj2 == &obj) {continue;};
                 float dx = obj2.pos[0] - obj.pos[0];
@@ -176,7 +186,7 @@ int main(void) {
                 float acc1 = gforce / obj.mass;
 
                 std::vector<float> acc = {acc1 * dir[0], acc1 * dir[1]};
-                obj.accelerate(acc[0], acc[1], delta);
+                obj.accelerate(acc[0], acc[1], delta * 1000);
             }
 
             // obj.accelarate(0, -9.81);
@@ -185,9 +195,62 @@ int main(void) {
             obj.check_bound(0, SCREEN_HEIGHT, 0, SCREEN_WIDTH);
         }
 
+
+}
+
+
+
+int main(void) {
+    GLFWwindow* window = start_GLFW();
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+
+    float center_x = SCREEN_WIDTH / 2.0f;
+    float center_y = SCREEN_HEIGHT / 2.0f;
+
+
+
+
+    std::vector<Object> objs = {};
+    last_frame_time = glfwGetTime();
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> pos_dist_x(100.0f, SCREEN_WIDTH - 100.0f);
+    std::uniform_real_distribution<float> pos_dist_y(100.0f, SCREEN_HEIGHT - 100.0f);
+    std::uniform_real_distribution<float> vel_dist(-20.0f, 20.0f);
+    std::uniform_real_distribution<float> mass_dist(1e21, 1e23);
+    std::uniform_real_distribution<float> density_dist(500.0f, 5000.0f);
+
+    // Generate N objects
+    int num_objects = 100; // Change this value for more objects
+    for (int i = 0; i < num_objects; i++) {
+        float x = pos_dist_x(gen);
+        float y = pos_dist_y(gen);
+        float vx = vel_dist(gen);
+        float vy = vel_dist(gen);
+        float mass = mass_dist(gen);
+        float density = density_dist(gen);
+
+        objs.push_back(Object({x, y}, {vx, vy}, mass, density, 10));
+    }
+
+    while(!glfwWindowShouldClose(window)) {        
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        float delta= calculate_delta();
+
+                for(auto& obj : objs) {
+
+            obj.accelerate(0, -9.81, delta);
+            obj.update_pos(delta);
+
+            obj.check_bound(0, SCREEN_HEIGHT, 0, SCREEN_WIDTH);
+        }
+
         for(size_t i = 0; i < objs.size(); i++) {
             for(size_t j = i + 1; j < objs.size(); j++) {
-                //objs[i].check_collision(objs[j]);
+                objs[i].check_collision(objs[j]);
             }
         }
 
