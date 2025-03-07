@@ -283,7 +283,7 @@ int main(void) {
 
         for(size_t i = 0; i < objs.size(); i++) {
             for(size_t j = i + 1; j < objs.size(); j++) {
-                //objs[i].check_collision(objs[j]);
+                objs[i].check_collision(objs[j]);
             }
         }
 
