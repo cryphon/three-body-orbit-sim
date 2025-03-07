@@ -17,7 +17,7 @@ double last_frame_time = 0.0;
 float camera_x = 0.0f;
 float camera_y = 0.0f;
 
-const GRID_SPACING = 50.0f;
+const float GRID_SPACING = 50.0f;
 const float GRID_ALPHA = 0.3f;
 
 
@@ -60,13 +60,17 @@ class Object {
         }
 
 
-        void draw() {
+        void draw(float cam_x, float cam_y) {
+
+            float screen_x = pos[0] - cam_x + SCREEN_WIDTH / 2;
+            float screen_y = pos[1] - cam_y + SCREEN_HEIGHT / 2;
+
             glBegin(GL_TRIANGLE_FAN);
-            glVertex2d(pos[0], pos[1]);
+            glVertex2d(screen_x, screen_y);
             for(int i = 0; i <= res; i++) {
                 float angle = 2.0f * PI * (static_cast<float>(i) / res);
-                float x = pos[0] + cos(angle) * this->radius;
-                float y = pos[1] + sin(angle) * this->radius;
+                float x = screen_x + cos(angle) * this->radius;
+                float y = screen_y + sin(angle) * this->radius;
                 glVertex2d(x, y);
             }
             glEnd();
@@ -152,7 +156,15 @@ int main(void) {
     while(!glfwWindowShouldClose(window)) {        
         glClear(GL_COLOR_BUFFER_BIT);
 
-        float delta= calculate_delta();
+        float delta = calculate_delta();
+
+
+        // update cam to track largest mass objs[2]
+        Object largest = objs[2];
+        float lerp_factor = 2.0f * delta;
+        camera_x += (largest.pos[0] - camera_x) * lerp_factor;
+        camera_y += (largest.pos[1] - camera_y) *lerp_factor;
+
 
         for(auto& obj : objs) {
             for(auto& obj2 : objs) {
@@ -186,7 +198,7 @@ int main(void) {
         }
 
         for(auto& obj : objs) {
-            obj.draw();
+            obj.draw(camera_x, camera_y);
         }
 
         glfwSwapBuffers(window);
