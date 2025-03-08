@@ -8,10 +8,10 @@ class Object {
         std::vector<float> vel;
         float mass;
         float radius;
-        int res;
+        const int static res = 100;
 
         std::vector<std::vector<float>> trail;
-        int trail_len = 500;
+        const int static trail_len = 500;
         float trail_color[3] = {1.0f, 1.0f, 1.0f};
 
     public:
