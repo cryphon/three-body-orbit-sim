@@ -2,13 +2,17 @@ cmake_minimum_required(VERSION 3.10)
 project(gravity_sim)
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 include_directories(${INCLUDE_DIR})
 
 set(MAIN_SOURCE_FILES
     ${SRC_DIR}/main.cpp
+    ${SRC_DIR}/object.cpp
+    ${SRC_DIR}/util.cpp
 )
 
 find_package(PkgConfig REQUIRED)
