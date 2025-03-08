@@ -1,6 +1,6 @@
-# Three-Body Problem Figure-8 Orbit Simulation
+# Three-Body Problem Orbit Simulation
 
-![Three-Body Figure-8 Orbit Simulation](3_body_orbit.gif)
+![Three-Body Orbit Simulation](3_body_orbit.gif)
 
 ## Overview
 
