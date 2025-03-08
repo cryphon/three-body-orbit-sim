@@ -25,7 +25,7 @@ void Object::accelerate(float x, float y, float delta) {
 }
 
 void Object::draw() {
-    glColor3f(0.949f, 0.949f, 0.949f);
+    glColor3f(trail_color[0], trail_color[1], trail_color[2]);
     glBegin(GL_TRIANGLE_FAN);
     glVertex2d(pos[0], pos[1]);
 
