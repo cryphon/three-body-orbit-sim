@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project is a physics-based simulation of the famous "figure-8" orbit solution to the three-body problem in gravitational physics. The simulation demonstrates how three celestial bodies of equal mass can orbit in a stable figure-8 pattern under mutual gravitational influence.
+This project is a physics-based simulation of the famous "figure-8" orbit solution to the three-body problem in gravitational physics. The simulation shows how three celestial bodies of equal mass can orbit in a stable figure-8 pattern under mutual gravitational influence. I built this project to learn more about physics and simulations while simultaneously preparing towards a 3d simulation of our solar system using OpenGL.
 
 ## The Three-Body Problem
 
@@ -18,7 +18,6 @@ This simulation implements:
 
 - **Newtonian Gravitational Physics**: Each body applies gravitational force on the others according to Newton's universal law of gravitation.
 - **Velocity Verlet Integration**: For numerical stability in the orbital calculations.
-- **Collision Detection**: Although not typically seen in the figure-8 orbit, the simulation includes elastic collision handling.
 - **Trail Visualization**: Each body leaves a colored trail showing its path over time, making the figure-8 pattern clearly visible.
 - **OpenGL Visualization**: The simulation is rendered using GLFW and OpenGL for smooth, real-time graphics.
 
@@ -60,13 +59,13 @@ Each body leaves a colored trail:
 - Body 2: Green trail
 - Body 3: Blue trail
 
-Trails fade over time to show the most recent movements more prominently.
 
 ## Building and Running
 
 ### Prerequisites
 
 - C++ compiler
+- CMake
 - GLFW3 library
 - OpenGL
 
@@ -78,16 +77,12 @@ git clone https://github.com/yourusername/figure8-orbit-sim.git
 cd figure8-orbit-sim
 
 # Build the project
-g++ -o gravity_sim main.cpp -lglfw -lGL
+mkdir build && cd build
+cmake ..
 
 # Run the simulation
-./gravity_sim
+make run
 ```
-
-## Controls
-
-- The simulation runs automatically once started
-- Close the window to exit the simulation
 
 ## Future Improvements
 
