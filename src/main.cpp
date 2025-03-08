@@ -2,8 +2,8 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <vector>
-#include "defs.hpp"
-#include "object.hpp"
+#include "defs.h"
+#include "object.h"
 
 const double G = 6.6743e-11; // m^3 kg^-1 s^-2
 
@@ -47,8 +47,6 @@ int main(void) {
                 std::vector<float>{center_x + 0.97000436f * scale, center_y - 0.24308753f * scale}, 
                 std::vector<float>{0.4662036850f * scale * 0.3f, 0.4323657300f * scale * 0.3f}, 
                 mass, 0, 0.3f, 0.3f, 1.0f),
-        //Object(std::vector<float>{center_x + 2.97000436f * scale, center_y - 0.24308753f * scale}, std::vector<float>{0.4662036850f * scale * 0.3f, 0.4323657300f * scale * 0.3f}, mass, 0, 0.3f, 0.3f, 1.0f)
-
     };
     last_frame_time = glfwGetTime();
     bool first_frame = true;
@@ -62,8 +60,8 @@ int main(void) {
         for(auto& obj : objs) {
             for(auto& obj2 : objs) {
                 if(&obj2 == &obj) {continue;};
-                float dx = obj2.pos[0] - obj.pos[0];
-                float dy = obj2.pos[1] - obj.pos[1];
+                float dx = obj2.get_pos()[0] - obj.get_pos()[0];
+                float dy = obj2.get_pos()[1] - obj.get_pos()[1];
                 float dist = sqrt(dx*dx + dy*dy);
                 std::vector<float> dir = {dx / dist, dy / dist};
 
@@ -71,8 +69,8 @@ int main(void) {
                 if(dist < MIN_DISTANCE) dist = MIN_DISTANCE;
 
                 float softening = 1e4;  // Prevents infinite force at small distances
-                float gforce = (G * obj.mass * obj2.mass) / (dist*dist + softening);
-                float acc1 = gforce / obj.mass;
+                float gforce = (G * obj.get_mass() * obj2.get_mass()) / (dist*dist + softening);
+                float acc1 = gforce / obj.get_mass();
 
                 std::vector<float> acc = {acc1 * dir[0], acc1 * dir[1]};
                 obj.accelerate(acc[0], acc[1], delta);
@@ -87,13 +85,7 @@ int main(void) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         for(auto& obj : objs) {
-            // Draw trail first
             obj.draw_trail();
-
-            // Set color based on mass
-            float mass_ratio = obj.mass / (7.35 * pow(10, 22));
-            if(mass_ratio > 1.0f) mass_ratio = 1.0f;
-            glColor3f(0.2f + 0.8f * mass_ratio, 0.2f + 0.8f * (1.0f - mass_ratio), 0.2f);
             obj.draw();
         }
 
