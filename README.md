@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project is a physics-based simulation of the famous "figure-8" orbit solution to the three-body problem in gravitational physics. The simulation shows how three celestial bodies of equal mass can orbit in a stable figure-8 pattern under mutual gravitational influence. I built this project to learn more about physics and simulations while simultaneously preparing towards a 3d simulation of our solar system using OpenGL.
+This project is a physics-based simulation of the famous orbit solution to the three-body problem in gravitational physics. The simulation shows how three celestial bodies of equal mass can orbit in a stable pattern under mutual gravitational influence. I built this project to learn more about physics and simulations while simultaneously preparing towards a 3d simulation of our solar system using OpenGL.
 
 ## The Three-Body Problem
 
@@ -18,7 +18,7 @@ This simulation implements:
 
 - **Newtonian Gravitational Physics**: Each body applies gravitational force on the others according to Newton's universal law of gravitation.
 - **Velocity Verlet Integration**: For numerical stability in the orbital calculations.
-- **Trail Visualization**: Each body leaves a colored trail showing its path over time, making the figure-8 pattern clearly visible.
+- **Trail Visualization**: Each body leaves a colored trail showing its path over time, making the pattern clearly visible.
 - **OpenGL Visualization**: The simulation is rendered using GLFW and OpenGL for smooth, real-time graphics.
 
 ## Technical Features
