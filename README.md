@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project is a physics-based simulation of the famous "figure-8" orbit solution to the three-body problem in gravitational physics. The simulation demonstrates how three celestial bodies of equal mass can orbit in a stable figure-8 pattern under mutual gravitational influence.
+This project is a physics-based simulation of the famous "figure-8" orbit solution to the three-body problem in gravitational physics. The simulation shows how three celestial bodies of equal mass can orbit in a stable figure-8 pattern under mutual gravitational influence.
 
 ## The Three-Body Problem
 
@@ -60,13 +60,13 @@ Each body leaves a colored trail:
 - Body 2: Green trail
 - Body 3: Blue trail
 
-Trails fade over time to show the most recent movements more prominently.
 
 ## Building and Running
 
 ### Prerequisites
 
 - C++ compiler
+- CMake
 - GLFW3 library
 - OpenGL
 
@@ -78,16 +78,12 @@ git clone https://github.com/yourusername/figure8-orbit-sim.git
 cd figure8-orbit-sim
 
 # Build the project
-g++ -o gravity_sim main.cpp -lglfw -lGL
+mkdir build && cd build
+cmake ..
 
 # Run the simulation
-./gravity_sim
+make run
 ```
-
-## Controls
-
-- The simulation runs automatically once started
-- Close the window to exit the simulation
 
 ## Future Improvements
 
