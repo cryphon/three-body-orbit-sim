@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project is a physics-based simulation of the famous orbit solution to the three-body problem in gravitational physics. The simulation shows how three celestial bodies of equal mass can orbit in a stable pattern under mutual gravitational influence. I built this project to learn more about physics and simulations while simultaneously preparing towards a 3d simulation of our solar system using OpenGL.
+This project is a physics-based simulation of the famous orbit solution to the three-body problem in gravitational physics. The simulation shows how three celestial bodies of equal mass can orbit in a stable pattern under mutual gravitational influence. I built this project to learn more about physics and simulations while simultaneously preparing towards a 3d renderer using OpenGL.
 
 ## The Three-Body Problem
 
